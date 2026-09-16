@@ -1,0 +1,569 @@
+<title>Niveau de vie France–Suisse</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F4F5F7; --surface:#FFFFFF; --ink:#15171B; --ink-2:#545A66; --ink-3:#8A909C;
+  --line:#D9DCE2; --line-soft:#E9EBEF; --head:#EEF0F3;
+  --accent:#C8102E; --accent-soft:#FBE9EC;
+  --ch:#e34948; --fr:#2a78d6; --grid:#E4E6EB; --good:#1C7C54;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#15171B; --surface:#1E2127; --ink:#F2F3F5; --ink-2:#A6ACB8; --ink-3:#737A87;
+    --line:#33373F; --line-soft:#2A2E36; --head:#252932;
+    --accent:#E66767; --accent-soft:#3A2226;
+    --ch:#e66767; --fr:#3987e5; --grid:#2A2E36; --good:#57B894;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#15171B; --surface:#1E2127; --ink:#F2F3F5; --ink-2:#A6ACB8; --ink-3:#737A87;
+  --line:#33373F; --line-soft:#2A2E36; --head:#252932;
+  --accent:#E66767; --accent-soft:#3A2226;
+  --ch:#e66767; --fr:#3987e5; --grid:#2A2E36; --good:#57B894;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;font-size:15.5px;line-height:1.5;padding-inline:20px;padding-block:0 72px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3,.eyebrow,.label,.tile small,.ctrl label,th,.f label{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+.mono{font-family:"IBM Plex Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+h1{font-size:clamp(30px,4.5vw,42px);font-weight:800;letter-spacing:-.025em;line-height:1.05;margin:10px 0 22px}
+h2{font-size:20px;font-weight:700;letter-spacing:-.015em;line-height:1.2;margin:0}
+p{margin:0 0 12px;max-width:72ch}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+header{padding-block:40px 0}
+.ref{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:2px solid var(--ink);border-bottom:1px solid var(--line)}
+.ref div{padding:12px 14px 12px 14px;border-right:1px solid var(--line-soft)}
+.ref div:first-child{padding-left:0}
+.ref div:last-child{border-right:0}
+.ref .label{display:block;margin-bottom:4px}
+.ref span.v{font-size:14.5px;font-weight:500;display:block}
+.ref [contenteditable]{outline:none;border-bottom:1px dashed var(--line);min-width:60px;display:inline-block}
+.ref [contenteditable]:focus{border-bottom-color:var(--accent)}
+section{padding-block:40px 0}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.sec-head .num{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent)}
+.sec-head p{margin:0 0 0 auto;font-size:13px;color:var(--ink-2);max-width:none}
+
+/* ---- saisie ---- */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line)}
+.panel-h{display:flex;align-items:baseline;gap:10px;padding:11px 14px;background:var(--head);border-bottom:1px solid var(--line)}
+.panel-h .label{color:var(--ink-2)}
+.panel-h b{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-weight:500;font-variant-numeric:tabular-nums;font-size:15px}
+.panel.fr .panel-h .label{color:var(--fr)}
+.panel.ch .panel-h .label{color:var(--ch)}
+.fields{padding:4px 14px 12px}
+.f{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.f:last-child{border-bottom:0}
+.f label{font-size:12.5px;font-weight:600;color:var(--ink-2);flex:1;line-height:1.3}
+.f label em{display:block;font-style:normal;font-weight:400;font-size:11.5px;color:var(--ink-3)}
+.in{display:flex;align-items:baseline;gap:5px;flex:0 0 auto}
+.in input[type=number]{width:96px;padding:5px 7px;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:14.5px;text-align:right;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:2px;-moz-appearance:textfield}
+.in input::-webkit-outer-spin-button,.in input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.in span{font-size:11.5px;color:var(--ink-3);width:44px;font-family:Archivo,sans-serif}
+.f select{padding:5px 7px;font:inherit;font-size:13.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:2px;max-width:56%}
+.f input:focus-visible,.f select:focus-visible,summary:focus-visible,input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sub{padding:9px 14px;border-top:1px solid var(--line);background:var(--bg);display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:600;color:var(--ink-2);font-family:Archivo,sans-serif}
+.sub b{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ---- tuiles ---- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));border:1px solid var(--line);background:var(--surface);margin:0 0 16px}
+.tile{padding:14px 16px;border-right:1px solid var(--line-soft)}
+.tile:last-child{border-right:0}
+.tile small{display:block;color:var(--ink-2);font-size:12px;line-height:1.35;margin-bottom:8px;font-weight:600;font-family:Archivo,sans-serif}
+.tile b{display:block;font-size:27px;font-weight:500;letter-spacing:-.02em;line-height:1;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.tile b em{font-style:normal;font-size:13px;color:var(--ink-3);margin-left:4px;font-family:Archivo,sans-serif}
+.tile.hero b{color:var(--accent)}
+.tile.hero{background:var(--accent-soft)}
+@media (max-width:640px){.tile{border-right:0;border-bottom:1px solid var(--line-soft)}.tile:last-child{border-bottom:0}}
+
+/* ---- barres comparatives ---- */
+.bars{background:var(--surface);border:1px solid var(--line);padding:16px 16px 8px;margin-bottom:16px}
+.brow{margin-bottom:14px}
+.brow .btop{display:flex;align-items:baseline;gap:10px;margin-bottom:5px;font-size:12.5px;font-family:Archivo,sans-serif;font-weight:700;color:var(--ink-2)}
+.brow .btop b{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+.bar{display:flex;height:34px;background:var(--line-soft);overflow:hidden}
+.seg{display:flex;align-items:center;padding:0 8px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:#fff;white-space:nowrap;overflow:hidden;min-width:0;font-variant-numeric:tabular-nums}
+.seg.charges{background:var(--ink-3)}
+.seg.rest{background:var(--fr)}
+.brow.ch .seg.rest{background:var(--ch)}
+.seg.pil{background:repeating-linear-gradient(135deg,var(--ch) 0 3px,transparent 3px 7px);border:1px solid var(--ch);color:var(--ink)}
+.blegend{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:Archivo,sans-serif;font-size:12px;color:var(--ink-2);margin-top:2px}
+.blegend i{display:inline-block;width:14px;height:10px;vertical-align:-1px;margin-right:6px}
+
+/* ---- réglages ---- */
+.controls{background:var(--surface);border:1px solid var(--line);padding:14px 16px 4px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px 22px;margin-bottom:16px}
+.controls .label{grid-column:1/-1;margin-bottom:-2px}
+.ctrl label{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:5px}
+.ctrl label output{font-family:"IBM Plex Mono",monospace;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+.ctrl input[type=range]{width:100%;accent-color:var(--accent);margin:0 0 10px}
+
+/* ---- tableaux ---- */
+.tablewrap{overflow-x:auto}
+table.num{border-collapse:collapse;width:100%;font-size:14px;background:var(--surface);border:1px solid var(--line)}
+table.num th,table.num td{text-align:right;padding:8px 12px;border-bottom:1px solid var(--line-soft)}
+table.num th:first-child,table.num td:first-child{text-align:left}
+table.num th{font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:700;background:var(--head)}
+table.num td{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+table.num td:first-child{font-family:"IBM Plex Sans",sans-serif}
+table.num tr.total td{font-weight:600;background:var(--head);border-top:1px solid var(--line)}
+table.num tr.total td:first-child{font-family:Archivo,sans-serif;font-weight:700}
+table.num td.neg{color:var(--ink-2)}
+table.num tr:last-child td{border-bottom:0}
+.tbl{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line)}
+.tbl th,.tbl td{text-align:left;vertical-align:top;padding:11px 14px;border-bottom:1px solid var(--line-soft);font-size:14.5px;line-height:1.45}
+.tbl th{font-family:Archivo,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);background:var(--head);padding-block:9px}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.k{font-family:Archivo,sans-serif;font-weight:700;white-space:nowrap}
+.tbl td.when{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--accent);white-space:nowrap}
+
+/* ---- graphe ---- */
+.chart{background:var(--surface);border:1px solid var(--line);padding:16px 14px 10px;position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:Archivo,sans-serif;font-size:12.5px;color:var(--ink-2);margin:0 0 10px 6px}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:7px}
+.legend i.band{height:10px;background:repeating-linear-gradient(135deg,var(--ch) 0 2px,transparent 2px 5px);opacity:.7}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-family:"IBM Plex Mono",monospace;font-size:12.5px;padding:8px 10px;border-radius:2px;line-height:1.5;white-space:nowrap;display:none;z-index:2}
+details{margin-top:12px}
+details.fold{margin:0 0 16px}
+details.fold>summary{padding:10px 14px;background:var(--surface);border:1px solid var(--line)}
+details.fold[open]>summary{border-bottom:0}
+details.fold>summary::before{content:"+ ";font-family:"IBM Plex Mono",monospace;color:var(--accent)}
+details.fold[open]>summary::before{content:"− "}
+details.fold .tablewrap table{border-top:0}
+summary{cursor:pointer;font-family:Archivo,sans-serif;font-size:13px;font-weight:700;color:var(--ink-2)}
+.note{font-size:13px;color:var(--ink-2);margin-top:12px;max-width:none;line-height:1.45}
+.next{background:var(--ink);color:var(--bg);padding:20px 22px;display:grid;grid-template-columns:1fr auto;gap:14px 30px;align-items:center;margin-top:16px}
+.next p{color:var(--bg);margin:0;font-size:15px}
+.next .mono{font-size:14px;opacity:.85}
+@media (max-width:600px){.next{grid-template-columns:1fr}}
+.foot{margin-top:26px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.foot b{color:var(--ink);font-weight:600}
+.toolbar{display:flex;gap:8px;margin:14px 0 0;flex-wrap:wrap}
+.toolbar button{font-family:Archivo,sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:7px 12px;cursor:pointer}
+.toolbar button:hover{color:var(--ink);border-color:var(--ink-3)}
+@media print{
+  body{background:#fff;padding-block:0 0}
+  .toolbar,.tip{display:none}
+  section{padding-block:22px 0;break-inside:avoid}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Outil de rendez-vous — Le Suisse Project</div>
+  <h1>Niveau de vie : France, puis Suisse</h1>
+  <div class="ref">
+    <div><span class="label">Prospect</span><span class="v"><span contenteditable="true" id="who">Prénom Nom</span></span></div>
+    <div><span class="label">Date</span><span class="v"><span contenteditable="true" id="when">—</span></span></div>
+    <div><span class="label">Préparé par</span><span class="v">Bastien Faivre, admissions</span></div>
+    <div><span class="label">Statut</span><span class="v">Simulation, hypothèses à valider</span></div>
+  </div>
+  <p style="margin-top:18px">On part de ce que vous gagnez et de ce que vous dépensez aujourd'hui. On y pose un salaire suisse réaliste pour votre métier, on retire les cotisations, l'impôt, l'assurance et la route. Ce qui reste, c'est le vrai écart. Tout est modifiable en direct.</p>
+  <div class="toolbar">
+    <button type="button" id="btn-print">Imprimer / PDF</button>
+    <button type="button" id="btn-reset">Réinitialiser</button>
+    <button type="button" id="btn-theme">Thème clair / sombre</button>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head"><span class="num">01</span><h2>Votre situation</h2><p>Chiffres du foyer, mensuels</p></div>
+  <div class="cols">
+
+    <div class="panel fr">
+      <div class="panel-h"><span class="label">Aujourd'hui — France</span><b><span id="p-fr">—</span> €</b></div>
+      <div class="fields">
+        <div class="f"><label for="i-netfr">Votre salaire net <em>avant impôt sur le revenu</em></label><div class="in"><input type="number" id="i-netfr" value="2400" step="50" min="0"><span>€ / mois</span></div></div>
+        <div class="f"><label for="i-couple">Foyer</label>
+          <select id="i-couple"><option value="0">Seul·e</option><option value="1">En couple, marié·e ou pacsé·e</option></select>
+        </div>
+        <div class="f"><label for="i-conj">Net du conjoint <em>reste en France, avant impôt</em></label><div class="in"><input type="number" id="i-conj" value="0" step="50" min="0"><span>€ / mois</span></div></div>
+        <div class="f"><label for="i-enf">Enfants à charge</label><div class="in"><input type="number" id="i-enf" value="0" step="1" min="0" max="6"><span>enf.</span></div></div>
+        <div class="f"><label for="i-loyer">Loyer ou crédit immobilier</label><div class="in"><input type="number" id="i-loyer" value="900" step="25" min="0"><span>€ / mois</span></div></div>
+        <div class="f"><label for="i-credits">Crédits, pensions, abonnements</label><div class="in"><input type="number" id="i-credits" value="250" step="25" min="0"><span>€ / mois</span></div></div>
+        <div class="f"><label for="i-vie">Vie courante <em>courses, énergie, enfants, loisirs</em></label><div class="in"><input type="number" id="i-vie" value="850" step="25" min="0"><span>€ / mois</span></div></div>
+        <div class="f"><label for="i-transfr">Transport aujourd'hui</label><div class="in"><input type="number" id="i-transfr" value="150" step="10" min="0"><span>€ / mois</span></div></div>
+        <div class="f"><label for="i-mutuelle">Mutuelle santé du foyer</label><div class="in"><input type="number" id="i-mutuelle" value="80" step="10" min="0"><span>€ / mois</span></div></div>
+      </div>
+      <div class="sub"><span>Impôt sur le revenu du foyer</span><b>− <span id="p-frimp">—</span> €</b></div>
+      <div class="sub"><span>Reste à vivre aujourd'hui</span><b><span id="p-frrest">—</span> €</b></div>
+    </div>
+
+    <div class="panel ch">
+      <div class="panel-h"><span class="label">Demain — frontalier en Suisse</span><b><span id="p-ch">—</span> €</b></div>
+      <div class="fields">
+        <div class="f"><label for="i-brut">Salaire brut visé <em>par mois, en francs</em></label><div class="in"><input type="number" id="i-brut" value="6500" step="100" min="0"><span>CHF / mois</span></div></div>
+        <div class="f"><label for="i-mois">Nombre de mois versés <em>13e salaire fréquent</em></label><div class="in"><input type="number" id="i-mois" value="13" step="1" min="12" max="14"><span>× / an</span></div></div>
+        <div class="f"><label for="i-canton">Canton d'emploi</label>
+          <select id="i-canton">
+            <option value="GE">Genève — impôt à la source en Suisse</option>
+            <option value="VD">Vaud, Valais, Neuchâtel, Jura, Berne, Bâle, Soleure — imposé en France</option>
+          </select>
+        </div>
+        <div class="f"><label for="i-sante">Assurance maladie</label>
+          <select id="i-sante">
+            <option value="lamal">LAMal frontalier</option>
+            <option value="cmu">CMU frontalière</option>
+          </select>
+        </div>
+        <div class="f"><label for="i-pers">Personnes à couvrir <em>pour la LAMal</em></label><div class="in"><input type="number" id="i-pers" value="1" step="1" min="1" max="8"><span>pers.</span></div></div>
+        <div class="f"><label for="i-transch">Trajet vers la Suisse <em>carburant, péage, parking ou abonnement</em></label><div class="in"><input type="number" id="i-transch" value="320" step="10" min="0"><span>€ / mois</span></div></div>
+      </div>
+      <div class="sub"><span>Imposition du foyer <span id="p-chimplab"></span></span><b>− <span id="p-chimp">—</span> €</b></div>
+      <div class="sub"><span>Reste à vivre en Suisse</span><b><span id="p-chrest">—</span> €</b></div>
+    </div>
+
+  </div>
+
+  <form class="controls" id="controls" onsubmit="return false" style="margin-top:16px">
+    <div class="label">Réglages fins</div>
+    <div class="ctrl"><label for="s-fx">Change CHF → EUR <output id="o-fx"></output></label><input type="range" id="s-fx" min="0.95" max="1.15" step="0.01" value="1.06"></div>
+    <div class="ctrl"><label for="s-age">Tranche d'âge <output id="o-age"></output></label><input type="range" id="s-age" min="25" max="64" step="1" value="38"></div>
+    <div class="ctrl"><label for="s-start">Prise de poste dans <output id="o-start"></output></label><input type="range" id="s-start" min="1" max="12" step="1" value="4"></div>
+  </form>
+</section>
+
+<section>
+  <div class="sec-head"><span class="num">02</span><h2>Ce qui change chaque mois</h2><p>À charges identiques</p></div>
+  <div class="tiles">
+    <div class="tile"><small>Reste à vivre aujourd'hui</small><b><span id="t-frrest">—</span><em>€ / mois</em></b></div>
+    <div class="tile"><small>Reste à vivre en Suisse</small><b><span id="t-chrest">—</span><em>€ / mois</em></b></div>
+    <div class="tile hero"><small>Écart mensuel</small><b><span id="t-delta">—</span><em>€ / mois</em></b></div>
+    <div class="tile"><small>2e pilier constitué en plus, part employeur incluse</small><b><span id="t-lpp">—</span><em>€ / mois</em></b></div>
+  </div>
+
+  <div class="bars">
+    <div class="brow fr">
+      <div class="btop"><span>France, aujourd'hui</span><b><span id="b-frlab">—</span></b></div>
+      <div class="bar"><i class="seg charges" id="b-frc"></i><i class="seg rest" id="b-frr"></i></div>
+    </div>
+    <div class="brow ch">
+      <div class="btop"><span>Suisse, frontalier</span><b><span id="b-chlab">—</span></b></div>
+      <div class="bar"><i class="seg charges" id="b-chc"></i><i class="seg rest" id="b-chr"></i><i class="seg pil" id="b-chp"></i></div>
+    </div>
+    <div class="blegend">
+      <span><i style="background:var(--ink-3)"></i>Charges du foyer</span>
+      <span><i style="background:var(--fr)"></i>Reste à vivre France</span>
+      <span><i style="background:var(--ch)"></i>Reste à vivre Suisse</span>
+      <span><i class="seg pil" style="width:14px;height:10px;display:inline-block;padding:0"></i>2e pilier, épargne forcée</span>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><small>Impôt sur le revenu aujourd'hui</small><b><span id="t-impfr">—</span><em>€ / mois</em></b></div>
+    <div class="tile"><small>Imposition du foyer en Suisse <span id="t-impchlab"></span></small><b><span id="t-impch">—</span><em>€ / mois</em></b></div>
+    <div class="tile"><small>Taux effectif, aujourd'hui → Suisse</small><b><span id="t-taux">—</span></b></div>
+  </div>
+  <details class="fold">
+    <summary>Détail du salaire suisse, du brut au net</summary>
+    <div class="tablewrap">
+      <table class="num" id="decomp">
+        <thead><tr><th>Du brut suisse au net qui rentre</th><th>CHF / mois</th><th>€ / mois</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note" id="note-decomp"></p>
+  </details>
+</section>
+
+<section>
+  <div class="sec-head"><span class="num">03</span><h2>L'accompagnement dans l'équation</h2><p>Coût unique, écart mensuel récurrent</p></div>
+  <form class="controls" onsubmit="return false" style="margin-bottom:16px">
+    <div class="label">Formule</div>
+    <div class="ctrl" style="grid-column:1/-1">
+      <label for="i-formule">Accompagnement Suisse 180 jours</label>
+      <select id="i-formule" style="width:100%;padding:6px 8px;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:2px;margin-bottom:10px">
+        <option value="2500">Solo, sans logement — 2 500 €</option>
+        <option value="3000">Solo, avec logement — 3 000 €</option>
+        <option value="3500">Couple, sans logement — 3 500 €</option>
+        <option value="4500">Couple, avec logement — 4 500 €</option>
+      </select>
+    </div>
+  </form>
+  <div class="tiles">
+    <div class="tile"><small>Investissement dans l'accompagnement</small><b><span id="t-prix">—</span><em>€</em></b></div>
+    <div class="tile hero"><small>Remboursé par l'écart de niveau de vie en</small><b><span id="t-roi">—</span><em>jours</em></b></div>
+    <div class="tile"><small>Part du gain de la première année</small><b><span id="t-part">—</span><em>%</em></b></div>
+    <div class="tile"><small>Coût d'un mois sans poste</small><b><span id="t-wait">—</span><em>€</em></b></div>
+  </div>
+  <div class="tablewrap">
+    <table class="tbl">
+      <thead><tr><th>Horizon</th><th>Ce que l'écart a produit</th><th>Net de l'accompagnement</th></tr></thead>
+      <tbody id="roi-rows"></tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="num">04</span><h2>Projection à dix ans</h2><p>Épargne cumulée, hypothèses réglables</p></div>
+  <p>Un frontalier garde le coût de la vie français et perçoit un revenu suisse. La différence devient du patrimoine. Le 2e pilier s'y ajoute : un capital de retraite qui vous appartient, cotisé pour moitié par l'employeur, mobilisable pour l'achat d'une résidence principale.</p>
+  <div class="chart" id="chart">
+    <div class="legend">
+      <span><i style="background:var(--ch)"></i>Suisse : épargne + 2e pilier, accompagnement déduit</span>
+      <span><i class="band"></i>dont 2e pilier</span>
+      <span><i style="background:var(--fr)"></i>France : épargne au rythme actuel</span>
+    </div>
+    <svg id="svg" viewBox="0 0 800 380" role="img" aria-labelledby="chart-title"><title id="chart-title">Épargne cumulée sur dix ans, France contre Suisse</title></svg>
+    <div class="tip" id="tip"></div>
+    <details><summary>Chiffres année par année</summary><div class="tablewrap"><table class="num" id="tbl"><thead><tr><th>Année</th><th>France</th><th>Suisse, liquide</th><th>Suisse, 2e pilier</th><th>Suisse, total</th><th>Écart</th></tr></thead><tbody></tbody></table></div></details>
+  </div>
+  <p class="note" id="note-proj"></p>
+  <p class="foot"><b>Hypothèses à valider ensemble :</b> métier et fourchette de salaire réellement accessibles · canton et temps de trajet · assurance maladie, droit d'option à exercer dans les trois mois · charges du foyer. Cette simulation n'est ni une promesse d'embauche, ni une promesse de salaire, ni un conseil fiscal. Garantie : sans poste à 180 jours, 180 jours offerts.</p>
+</section>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('fr-CH').replace(/ | |\s/g,' ');
+const pct=x=>(x*100).toFixed(1).replace('.',',')+' %';
+
+/* Paramètres de calcul — un seul endroit à mettre à jour */
+const P={
+  avs:0.053,          /* AVS 4,35 % + AI 0,7 % + APG 0,25 % */
+  ac:0.011, acCeil:148200, acSolid:0.005,
+  laa:0.008,          /* accident non professionnel, moyenne employeur */
+  lppSeuil:22680, lppDeduc:26460, lppCoordMax:64260,
+  lamalAdulte:280,    /* CHF / mois / personne, franchise haute */
+  cmuTaux:0.08, cmuAbat:0.25,
+  /* Genève, impôt à la source 2026 : taux effectifs sur le brut annuel, barèmes officiels (tar26GE), points 50k→200k CHF.
+     A = seul, H = parent seul, B = couple un revenu, C = couple deux revenus ; chiffre = enfants à charge.
+     ponytail: au-delà de 2 enfants on garde la ligne 2, au-delà de 200k le taux est plafonné (il continue en réalité de monter). */
+  geX:[50000,70000,90000,120000,150000,200000],
+  ge:{A0:[5.5,9.5,12.3,15.6,18.0,21.4], A1:[0.3,4.4,8.1,12.0,15.0,18.9], A2:[0.1,0.5,4.1,8.6,12.1,16.5],
+      B0:[0,1.5,4.7,8.5,11.6,15.7],     B1:[0,0,1.3,5.4,8.8,13.3],       B2:[0,0,0,2.5,6.1,11.0],
+      C0:[5.2,9.5,11.6,13.9,16.1,19.5], C1:[2.2,6.6,9.1,11.8,14.1,18.0],  C2:[0,4.0,6.6,9.8,12.3,16.4],
+      H1:[0,0,2.6,6.7,10.0,14.4],       H2:[0,0,0.1,3.7,7.2,12.0]},
+  /* Barème de l'impôt sur le revenu français, par part */
+  bareme:[[11497,0],[29315,0.11],[83823,0.30],[180294,0.41],[Infinity,0.45]]
+};
+const interp=(xs,ys,x)=>{if(x<=xs[0])return ys[0];
+  for(let i=1;i<xs.length;i++){if(x<=xs[i])return ys[i-1]+(ys[i]-ys[i-1])*(x-xs[i-1])/(xs[i]-xs[i-1]);}
+  return ys[ys.length-1];};
+function baremeGE(couple,conj,enf){
+  const n=Math.min(enf,2);
+  if(!couple) return n?'H'+n:'A0';
+  return (conj>0?'C':'B')+n;
+}
+function irFrance(revenu,parts){
+  const q=Math.max(revenu,0)*0.9/parts; let ir=0,prev=0;
+  for(const t of P.bareme){ if(q>prev) ir+=(Math.min(q,t[0])-prev)*t[1]; if(q<=t[0])break; prev=t[0]; }
+  return ir*parts;
+}
+function cotis(brut,age){
+  const avs=brut*P.avs;
+  const ac=Math.min(brut,P.acCeil)*P.ac+Math.max(brut-P.acCeil,0)*P.acSolid;
+  const laa=brut*P.laa;
+  const coord=Math.min(Math.max(brut-P.lppDeduc,0),P.lppCoordMax);
+  const lppTot=brut>=P.lppSeuil?coord*lppTaux(age):0;
+  return {avs,ac,laa,lppTot,lppSal:lppTot/2};
+}
+const lppTaux=a=>a<35?0.07:a<45?0.10:a<55?0.15:0.18;
+const parts=(couple,enf)=>(couple?2:1)+Math.min(enf,2)*0.5+Math.max(enf-2,0);
+const YEARS=10;
+
+const NUM=['i-netfr','i-conj','i-enf','i-loyer','i-credits','i-vie','i-transfr','i-mutuelle','i-brut','i-mois','i-pers','i-transch'];
+const SEL=['i-couple','i-canton','i-sante','i-formule'];
+const RNG=['s-fx','s-age','s-start'];
+const DEF={};
+[...NUM,...SEL,...RNG].forEach(id=>DEF[id]=$(id).value);
+const v=id=>+$(id).value||0;
+
+function model(){
+  const fx=+$('s-fx').value, mois=Math.max(v('i-mois'),12), brutM=v('i-brut'), brut=brutM*mois;
+  const couple=$('i-couple').value==='1', conj=couple?v('i-conj')*12:0, enf=v('i-enf'), np=parts(couple,enf);
+  const GE=$('i-canton').value==='GE';
+
+  /* France aujourd'hui : IR du foyer au barème */
+  const meFR=v('i-netfr')*12;
+  const irFR=irFrance(meFR+conj,np);
+
+  /* Suisse : cotisations, puis impôt selon le canton */
+  const c=cotis(brut,v('s-age')), {avs,ac,laa,lppTot,lppSal}=c;
+  const netCotCHF=brut-avs-ac-laa-lppSal, netCotEUR=netCotCHF*fx;
+  let impotMe, impotConj, tauxGE=0, bar='';
+  if(GE){
+    bar=baremeGE(couple,conj,enf);
+    tauxGE=interp(P.geX,P.ge[bar],brut)/100;
+    impotMe=brut*tauxGE*fx;                                    /* impôt à la source, sur le brut */
+    const tot=netCotEUR+conj;                                  /* taux effectif : le revenu suisse fixe le taux du conjoint */
+    impotConj=conj>0?irFrance(tot,np)*conj/tot:0;
+  } else {
+    const tot=netCotEUR+conj, ir=irFrance(tot,np);
+    impotMe=tot>0?ir*netCotEUR/tot:0; impotConj=ir-impotMe;
+  }
+  const impotCH=impotMe+impotConj;
+
+  const santeEUR=$('i-sante').value==='lamal'
+    ? P.lamalAdulte*Math.max(v('i-pers'),1)*12*fx
+    : Math.max(netCotEUR*(1-P.cmuAbat),0)*P.cmuTaux;
+
+  const base=v('i-loyer')+v('i-credits')+v('i-vie');
+  const chargesFR=base+v('i-transfr')+v('i-mutuelle');
+  const chargesCH=base+v('i-transch')+santeEUR/12;
+  const netFR=(meFR+conj-irFR)/12, netCH=(netCotEUR+conj-impotCH)/12;
+  const netEUR=(netCotEUR-impotMe)/12;                        /* ce qui rentre du salaire suisse */
+  const restFR=netFR-chargesFR, restCH=netCH-chargesCH;
+  const lppEUR=lppTot*fx/12;
+
+  return {fx,mois,brutM,brut,avs,ac,laa,lppTot,lppSal,netCotCHF,netCotEUR,GE,tauxGE,bar,np,couple,conj,enf,
+          meFR,irFR,impotMe,impotConj,impotCH,santeEUR,chargesFR,chargesCH,netFR,netCH,netEUR,restFR,restCH,lppEUR,
+          delta:restCH-restFR,prix:+$('i-formule').value,start:v('s-start')};
+}
+
+function rows(m){
+  const r=[];
+  for(let y=0;y<=YEARS;y++){
+    const mo=12*y, before=Math.min(mo,m.start), after=Math.max(mo-m.start,0);
+    const liq=m.restFR*before+m.restCH*after-(mo>0?m.prix:0);
+    r.push({y,fr:m.restFR*mo,liq,pil:m.lppEUR*after,tot:liq+m.lppEUR*after});
+  }
+  return r;
+}
+
+/* ---- rendu ---- */
+const svg=$('svg'), tip=$('tip'), NS='http://www.w3.org/2000/svg';
+const M={l:64,r:110,t:18,b:40}, W=800, H=380;
+const el=(n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+function render(){
+  const m=model(), rs=rows(m);
+  $('o-fx').value=(+$('s-fx').value).toFixed(2).replace('.',',');
+  $('o-age').value=v('s-age')+' ans · '+Math.round(lppTaux(v('s-age'))*100)+' %';
+  $('o-start').value=m.start+' mois';
+  $('i-conj').disabled=!m.couple;
+
+  $('p-fr').textContent=fmt(m.netFR);
+  $('p-frimp').textContent=fmt(m.irFR/12);
+  $('p-frrest').textContent=fmt(m.restFR);
+  $('p-ch').textContent=fmt(m.netCH);
+  $('p-chimp').textContent=fmt(m.impotCH/12);
+  $('p-chrest').textContent=fmt(m.restCH);
+  $('p-chimplab').textContent=m.GE?'(source GE, barème '+m.bar+(m.conj>0?', + IR du conjoint)':')'):'(IR français)';
+  $('t-frrest').textContent=fmt(m.restFR);
+  $('t-chrest').textContent=fmt(m.restCH);
+  $('t-delta').textContent=(m.delta>0?'+':'')+fmt(m.delta);
+  $('t-lpp').textContent='+'+fmt(m.lppEUR);
+
+  /* imposition */
+  const revFR=m.meFR+m.conj, revCH=m.netCotEUR+m.conj;
+  $('t-impfr').textContent=fmt(m.irFR/12);
+  $('t-impch').textContent=fmt(m.impotCH/12);
+  $('t-impchlab').textContent=m.GE?'· source GE'+(m.conj>0?' + IR conjoint':''):'· IR français';
+  $('t-taux').textContent=pct(revFR>0?m.irFR/revFR:0)+' → '+pct(revCH>0?m.impotCH/revCH:0);
+
+  /* barres */
+  const max=Math.max(m.netFR,m.netCH+m.lppEUR,1);
+  const w=x=>(Math.max(x,0)/max*100).toFixed(2)+'%';
+  const put=(id,val,txt)=>{const e=$(id);e.style.width=w(val);e.textContent=val/max>0.13?txt:'';e.title=txt;};
+  put('b-frc',m.chargesFR,fmt(m.chargesFR)+' €');
+  put('b-frr',m.restFR,fmt(m.restFR)+' €');
+  put('b-chc',m.chargesCH,fmt(m.chargesCH)+' €');
+  put('b-chr',m.restCH,fmt(m.restCH)+' €');
+  put('b-chp',m.lppEUR,fmt(m.lppEUR)+' €');
+  $('b-frlab').textContent=fmt(m.netFR)+' € net après impôt';
+  $('b-chlab').textContent=fmt(m.netCH)+' € net après impôt'+(m.lppEUR>0?' + '+fmt(m.lppEUR)+' € de 2e pilier':'');
+
+  /* décomposition du salaire suisse */
+  const eur=c=>c*m.fx/12;
+  const line=(k,chf,neg)=>'<tr'+(neg?' class="neg"':'')+'><td>'+k+'</td><td'+(neg?' class="neg"':'')+'>'+(neg?'− ':'')+fmt(Math.abs(chf)/12)+'</td><td'+(neg?' class="neg"':'')+'>'+(neg?'− ':'')+fmt(Math.abs(eur(chf)))+'</td></tr>';
+  const tr=v('i-transch');
+  $('decomp').querySelector('tbody').innerHTML=
+    '<tr class="total"><td>Brut, lissé sur douze mois ('+m.mois+' mois versés)</td><td>'+fmt(m.brut/12)+'</td><td>'+fmt(eur(m.brut))+'</td></tr>'
+    +line('AVS, AI, APG — 5,3 %',m.avs,1)
+    +line('Assurance chômage et solidarité',m.ac,1)
+    +line('Assurance accident non professionnelle',m.laa,1)
+    +line('2e pilier, part salarié ('+Math.round(lppTaux(v('s-age'))*100)+' % du salaire coordonné, moitié employeur)',m.lppSal,1)
+    +line(m.GE?'Impôt à la source, Genève, barème '+m.bar+' — '+pct(m.tauxGE)+' du brut':'Impôt sur le revenu français, part du salaire suisse',m.impotMe/m.fx,1)
+    +'<tr class="total"><td>Net qui rentre sur le compte</td><td>'+fmt(m.netEUR/m.fx)+'</td><td>'+fmt(m.netEUR)+'</td></tr>'
+    +line($('i-sante').value==='lamal'?'Assurance maladie LAMal':'Cotisation maladie CMU',m.santeEUR/m.fx,1)
+    +'<tr class="neg"><td>Trajet vers la Suisse</td><td class="neg">− '+fmt(tr/m.fx)+'</td><td class="neg">− '+fmt(tr)+'</td></tr>'
+    +'<tr class="total"><td>Disponible après santé et trajet</td><td>'+fmt((m.netEUR-m.santeEUR/12-tr)/m.fx)+'</td><td>'+fmt(m.netEUR-m.santeEUR/12-tr)+'</td></tr>';
+  $('note-decomp').innerHTML='<b>Le 2e pilier est retiré du net mais reste votre argent</b> : '+fmt(m.lppEUR)+' € par mois de capital, part employeur comprise, dont '+fmt(m.lppSal*m.fx/12)+' € prélevés sur votre salaire. '
+    +'Cotisations salarié AVS-AI-APG 5,3 %, chômage 1,1 % jusqu’à 148 200 CHF puis 0,5 %, accident non professionnel 0,8 %. 2e pilier au minimum légal : déduction de coordination 26 460 CHF, plafond 64 260 CHF. '
+    +($('i-sante').value==='cmu'?'CMU estimée à 8 % du revenu après abattement. ':'LAMal estimée à 280 CHF par personne et par mois, franchise haute. ')
+    +'Impôt français au barème de l’IR sur '+String(m.np).replace('.',',')+' part'+(m.np>1?'s':'')+', abattement de 10 %, sans plafonnement du quotient ni réductions. '
+    +(m.GE?'À Genève, impôt à la source au barème 2026 '+m.bar+' (taux effectif officiel sur le brut, interpolé entre 50 000 et 200 000 CHF) ; le revenu suisse est exonéré en France mais fixe le taux d’imposition du conjoint. ':'Dans les cantons de l’accord de 1983, le salaire suisse net de cotisations est imposé en France avec le reste du foyer. ')
+    +'Ordres de grandeur, à valider avec le conseiller fiscal.';
+
+  /* accompagnement */
+  const prix=m.prix, gain=m.delta+m.lppEUR;
+  $('t-prix').textContent=fmt(prix);
+  $('t-roi').textContent=gain>0?fmt(prix/gain*30):'—';
+  $('t-part').textContent=gain>0?fmt(prix/(gain*12)*100):'—';
+  $('t-wait').textContent=fmt(Math.max(gain,0));
+  $('roi-rows').innerHTML=[[1,'Au bout d’un an'],[3,'Au bout de trois ans'],[5,'Au bout de cinq ans'],[10,'Au bout de dix ans']]
+    .map(([y,lab])=>'<tr><td class="k">'+lab+'</td><td class="mono">'+fmt(gain*12*y)+' €</td><td class="mono">'+fmt(gain*12*y-prix)+' €</td></tr>').join('');
+
+  /* graphe */
+  const maxV=Math.max(rs[YEARS].tot,rs[YEARS].fr,20000);
+  const step=maxV>600000?200000:maxV>300000?100000:maxV>120000?50000:20000;
+  const minV=Math.min(0,rs[1].liq,rs[YEARS].fr);
+  const top=Math.ceil(maxV/step)*step, bot=Math.floor(minV/step)*step;
+  const x=y=>M.l+(y/YEARS)*(W-M.l-M.r), yy=val=>M.t+(1-(val-bot)/(top-bot))*(H-M.t-M.b);
+  svg.innerHTML='<title>Épargne cumulée sur dix ans, France contre Suisse</title>';
+  const defs=el('defs',{});
+  const pat=el('pattern',{id:'hatch',width:'6',height:'6',patternUnits:'userSpaceOnUse',patternTransform:'rotate(135)'});
+  pat.appendChild(el('rect',{width:'2',height:'6',fill:'var(--ch)',opacity:'.55'}));
+  defs.appendChild(pat);svg.appendChild(defs);
+  for(let val=bot;val<=top;val+=step){
+    svg.appendChild(el('line',{x1:M.l,x2:W-M.r,y1:yy(val),y2:yy(val),stroke:'var(--grid)','stroke-width':'1'}));
+    const t=el('text',{x:M.l-10,y:yy(val)+4,'text-anchor':'end',fill:'var(--ink-3)','font-size':'12','font-family':'IBM Plex Mono, monospace'});
+    t.textContent=val===0?'0':(val/1000)+' k€';svg.appendChild(t);
+  }
+  for(let y=0;y<=YEARS;y+=2){
+    const t=el('text',{x:x(y),y:H-M.b+22,'text-anchor':'middle',fill:'var(--ink-3)','font-size':'12','font-family':'IBM Plex Mono, monospace'});
+    t.textContent=y===0?"aujourd'hui":'an '+y;svg.appendChild(t);
+  }
+  svg.appendChild(el('line',{x1:M.l,x2:W-M.r,y1:yy(0),y2:yy(0),stroke:'var(--line)','stroke-width':'1'}));
+  const path=k=>rs.map((r,i)=>(i?'L':'M')+x(r.y).toFixed(1)+' '+yy(r[k]).toFixed(1)).join(' ');
+  const band=path('liq')+' '+rs.slice().reverse().map(r=>'L'+x(r.y).toFixed(1)+' '+yy(r.tot).toFixed(1)).join(' ')+' Z';
+  svg.appendChild(el('path',{d:band,fill:'url(#hatch)',stroke:'none'}));
+  svg.appendChild(el('path',{d:path('fr'),fill:'none',stroke:'var(--fr)','stroke-width':'2.5','stroke-linejoin':'round'}));
+  svg.appendChild(el('path',{d:path('liq'),fill:'none',stroke:'var(--ch)','stroke-width':'1.5','stroke-dasharray':'3 4'}));
+  svg.appendChild(el('path',{d:path('tot'),fill:'none',stroke:'var(--ch)','stroke-width':'2.5','stroke-linejoin':'round'}));
+  const last=rs[YEARS];
+  const lab=(val,txt,color,dy)=>{const g=el('g',{});
+    g.appendChild(el('circle',{cx:x(YEARS),cy:yy(val),r:'4.5',fill:color,stroke:'var(--surface)','stroke-width':'2'}));
+    const t=el('text',{x:x(YEARS)+10,y:yy(val)+dy,fill:'var(--ink)','font-size':'13','font-family':'IBM Plex Mono, monospace','font-weight':'500'});
+    t.textContent=txt;g.appendChild(t);svg.appendChild(g);};
+  let dyFR=4,dyCH=4; if(Math.abs(yy(last.tot)-yy(last.fr))<16){dyCH=-4;dyFR=12;}
+  lab(last.tot,fmt(last.tot/1000)+' k€','var(--ch)',dyCH);
+  lab(last.fr,fmt(last.fr/1000)+' k€','var(--fr)',dyFR);
+  const cross=el('line',{x1:0,x2:0,y1:M.t,y2:H-M.b,stroke:'var(--ink-3)','stroke-width':'1','stroke-dasharray':'2 3',opacity:'0'});svg.appendChild(cross);
+  const hit=el('rect',{x:M.l,y:M.t,width:W-M.l-M.r,height:H-M.t-M.b,fill:'transparent'});svg.appendChild(hit);
+  hit.addEventListener('mousemove',ev=>{
+    const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;
+    const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+    const y=Math.max(0,Math.min(YEARS,Math.round((p.x-M.l)/(W-M.l-M.r)*YEARS)));const r=rs[y];
+    cross.setAttribute('x1',x(y));cross.setAttribute('x2',x(y));cross.setAttribute('opacity','1');
+    tip.style.display='block';
+    tip.innerHTML=(y===0?"Aujourd'hui":'Année '+y)+'<br>Suisse : '+fmt(r.tot)+' €<br>dont 2e pilier : '+fmt(r.pil)+' €<br>France : '+fmt(r.fr)+' €<br>Écart : '+fmt(r.tot-r.fr)+' €';
+    const box=$('chart').getBoundingClientRect();let lx=ev.clientX-box.left+14,ly=ev.clientY-box.top-10;
+    if(lx+tip.offsetWidth>box.width-8)lx-=tip.offsetWidth+28;
+    tip.style.left=lx+'px';tip.style.top=ly+'px';});
+  hit.addEventListener('mouseleave',()=>{tip.style.display='none';cross.setAttribute('opacity','0');});
+  const tb=$('tbl').querySelector('tbody');tb.innerHTML='';
+  rs.filter(r=>r.y%2===0).forEach(r=>{const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(r.y===0?"aujourd'hui":'an '+r.y)+'</td><td>'+fmt(r.fr)+' €</td><td>'+fmt(r.liq)+' €</td><td>'+fmt(r.pil)+' €</td><td>'+fmt(r.tot)+' €</td><td>'+fmt(r.tot-r.fr)+' €</td>';
+    tb.appendChild(tr);});
+  $('note-proj').textContent='Les '+m.start+' premiers mois restent au rythme d’épargne français, la phase suisse démarre à la prise de poste, et le coût de l’accompagnement ('+fmt(m.prix)+' €) est retiré dès la première année. Sans rendement des placements ni du 2e pilier, sans progression de salaire, sans inflation. Ordres de grandeur, à valider avec le conseiller fiscal de l’accompagnement.';
+}
+
+[...NUM,...SEL,...RNG].forEach(id=>{$(id).addEventListener('input',render);$(id).addEventListener('change',render);});
+$('btn-print').addEventListener('click',()=>window.print());
+$('btn-theme').addEventListener('click',()=>{
+  const d=document.documentElement;
+  const cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  d.setAttribute('data-theme',cur==='dark'?'light':'dark');});
+$('btn-reset').addEventListener('click',()=>{for(const id in DEF)$(id).value=DEF[id];render();});
+$('when').textContent=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+render();
+})();
+</script>
