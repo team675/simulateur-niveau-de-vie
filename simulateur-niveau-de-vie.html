@@ -60,6 +60,7 @@ section{padding-block:40px 0}
 .fields{padding:4px 14px 12px}
 .f{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
 .f:last-child{border-bottom:0}
+.f[hidden]{display:none}
 .f label{font-size:12.5px;font-weight:600;color:var(--ink-2);flex:1;line-height:1.3}
 .f label em{display:block;font-style:normal;font-weight:400;font-size:11.5px;color:var(--ink-3)}
 .in{display:flex;align-items:baseline;gap:5px;flex:0 0 auto}
@@ -192,6 +193,7 @@ summary{cursor:pointer;font-family:Archivo,sans-serif;font-size:13px;font-weight
         <div class="f"><label for="i-mutuelle">Mutuelle santé du foyer</label><div class="in"><input type="number" id="i-mutuelle" value="80" step="10" min="0"><span>€ / mois</span></div></div>
       </div>
       <div class="sub"><span>Impôt sur le revenu du foyer</span><b>− <span id="p-frimp">—</span> €</b></div>
+      <div class="sub"><span>Charges du foyer</span><b>− <span id="p-frch">—</span> €</b></div>
       <div class="sub"><span>Reste à vivre aujourd'hui</span><b><span id="p-frrest">—</span> €</b></div>
     </div>
 
@@ -213,9 +215,18 @@ summary{cursor:pointer;font-family:Archivo,sans-serif;font-size:13px;font-weight
           </select>
         </div>
         <div class="f"><label for="i-pers">Personnes à couvrir <em>pour la LAMal</em></label><div class="in"><input type="number" id="i-pers" value="1" step="1" min="1" max="8"><span>pers.</span></div></div>
-        <div class="f"><label for="i-transch">Trajet vers la Suisse <em>carburant, péage, parking ou abonnement</em></label><div class="in"><input type="number" id="i-transch" value="320" step="10" min="0"><span>€ / mois</span></div></div>
+        <div class="f"><label for="i-log">Logement après la prise de poste</label>
+          <select id="i-log">
+            <option value="same">Inchangé, je reste où je suis</option>
+            <option value="fr">Je me rapproche, côté France</option>
+            <option value="ch">Je m'installe en Suisse</option>
+          </select>
+        </div>
+        <div class="f" id="f-loyerch" hidden><label for="i-loyerch">Nouveau loyer <em id="e-loyerch">côté frontière française</em></label><div class="in"><input type="number" id="i-loyerch" value="1200" step="50" min="0"><span id="u-loyerch">€ / mois</span></div></div>
+        <div class="f"><label for="i-transch">Trajet domicile-travail <em>carburant, péage, parking ou abonnement</em></label><div class="in"><input type="number" id="i-transch" value="320" step="10" min="0"><span>€ / mois</span></div></div>
       </div>
       <div class="sub"><span>Imposition du foyer <span id="p-chimplab"></span></span><b>− <span id="p-chimp">—</span> €</b></div>
+      <div class="sub"><span>Charges du foyer <span id="p-chchlab"></span></span><b>− <span id="p-chch">—</span> €</b></div>
       <div class="sub"><span>Reste à vivre en Suisse</span><b><span id="p-chrest">—</span> €</b></div>
     </div>
 
@@ -230,7 +241,7 @@ summary{cursor:pointer;font-family:Archivo,sans-serif;font-size:13px;font-weight
 </section>
 
 <section>
-  <div class="sec-head"><span class="num">02</span><h2>Ce qui change chaque mois</h2><p>À charges identiques</p></div>
+  <div class="sec-head"><span class="num">02</span><h2>Ce qui change chaque mois</h2><p>Revenus, impôts et charges comparés</p></div>
   <div class="tiles">
     <div class="tile"><small>Reste à vivre aujourd'hui</small><b><span id="t-frrest">—</span><em>€ / mois</em></b></div>
     <div class="tile"><small>Reste à vivre en Suisse</small><b><span id="t-chrest">—</span><em>€ / mois</em></b></div>
@@ -330,7 +341,9 @@ const P={
   ac:0.011, acCeil:148200, acSolid:0.005,
   laa:0.008,          /* accident non professionnel, moyenne employeur */
   lppSeuil:22680, lppDeduc:26460, lppCoordMax:64260,
-  lamalAdulte:280,    /* CHF / mois / personne, franchise haute */
+  lamalAdulte:280,    /* frontalier, CHF / mois / personne : de 200 (Helsana) à 350 selon caisse et franchise */
+  lamalRes:{GE:616,VD:450},  /* résident en Suisse, prime moyenne adulte 2026 : GE 616, moyenne nationale 393 */
+  vieCH:1.4,          /* coût de la vie courante en Suisse, rapport à la France */
   cmuTaux:0.08, cmuAbat:0.25,
   /* Genève, impôt à la source 2026 : taux effectifs sur le brut annuel, barèmes officiels (tar26GE), points 50k→200k CHF.
      A = seul, H = parent seul, B = couple un revenu, C = couple deux revenus ; chiffre = enfants à charge.
@@ -368,8 +381,8 @@ const lppTaux=a=>a<35?0.07:a<45?0.10:a<55?0.15:0.18;
 const parts=(couple,enf)=>(couple?2:1)+Math.min(enf,2)*0.5+Math.max(enf-2,0);
 const YEARS=10;
 
-const NUM=['i-netfr','i-conj','i-enf','i-loyer','i-credits','i-vie','i-transfr','i-mutuelle','i-brut','i-mois','i-pers','i-transch'];
-const SEL=['i-couple','i-canton','i-sante','i-formule'];
+const NUM=['i-netfr','i-conj','i-enf','i-loyer','i-credits','i-vie','i-transfr','i-mutuelle','i-brut','i-mois','i-pers','i-transch','i-loyerch'];
+const SEL=['i-couple','i-canton','i-sante','i-formule','i-log'];
 const RNG=['s-fx','s-age','s-start'];
 const DEF={};
 [...NUM,...SEL,...RNG].forEach(id=>DEF[id]=$(id).value);
@@ -379,6 +392,7 @@ function model(){
   const fx=+$('s-fx').value, mois=Math.max(v('i-mois'),12), brutM=v('i-brut'), brut=brutM*mois;
   const couple=$('i-couple').value==='1', conj=couple?v('i-conj')*12:0, enf=v('i-enf'), np=parts(couple,enf);
   const GE=$('i-canton').value==='GE';
+  const log=$('i-log').value, resident=log==='ch', source=GE||resident;
 
   /* France aujourd'hui : IR du foyer au barème */
   const meFR=v('i-netfr')*12;
@@ -388,32 +402,37 @@ function model(){
   const c=cotis(brut,v('s-age')), {avs,ac,laa,lppTot,lppSal}=c;
   const netCotCHF=brut-avs-ac-laa-lppSal, netCotEUR=netCotCHF*fx;
   let impotMe, impotConj, tauxGE=0, bar='';
-  if(GE){
+  if(source){
     bar=baremeGE(couple,conj,enf);
     tauxGE=interp(P.geX,P.ge[bar],brut)/100;
     impotMe=brut*tauxGE*fx;                                    /* impôt à la source, sur le brut */
-    const tot=netCotEUR+conj;                                  /* taux effectif : le revenu suisse fixe le taux du conjoint */
-    impotConj=conj>0?irFrance(tot,np)*conj/tot:0;
+    /* frontalier : le revenu suisse est exonéré en France mais fixe le taux du conjoint.
+       résident : le conjoint qui garde un emploi en France n'est imposé que sur ce salaire. */
+    const tot=netCotEUR+conj;
+    impotConj=conj>0?(resident?irFrance(conj,np):irFrance(tot,np)*conj/tot):0;
   } else {
     const tot=netCotEUR+conj, ir=irFrance(tot,np);
     impotMe=tot>0?ir*netCotEUR/tot:0; impotConj=ir-impotMe;
   }
   const impotCH=impotMe+impotConj;
 
-  const santeEUR=$('i-sante').value==='lamal'
-    ? P.lamalAdulte*Math.max(v('i-pers'),1)*12*fx
+  const pers=Math.max(v('i-pers'),1);
+  const santeEUR=resident ? P.lamalRes[GE?'GE':'VD']*pers*12*fx
+    : $('i-sante').value==='lamal' ? P.lamalAdulte*pers*12*fx
     : Math.max(netCotEUR*(1-P.cmuAbat),0)*P.cmuTaux;
 
-  const base=v('i-loyer')+v('i-credits')+v('i-vie');
-  const chargesFR=base+v('i-transfr')+v('i-mutuelle');
-  const chargesCH=base+v('i-transch')+santeEUR/12;
+  /* le logement suit le déménagement ; en Suisse, la vie courante aussi */
+  const loyerCH=log==='same'?v('i-loyer'):resident?v('i-loyerch')*fx:v('i-loyerch');
+  const vieCH=resident?v('i-vie')*P.vieCH:v('i-vie');
+  const chargesFR=v('i-loyer')+v('i-credits')+v('i-vie')+v('i-transfr')+v('i-mutuelle');
+  const chargesCH=loyerCH+v('i-credits')+vieCH+v('i-transch')+santeEUR/12;
   const netFR=(meFR+conj-irFR)/12, netCH=(netCotEUR+conj-impotCH)/12;
   const netEUR=(netCotEUR-impotMe)/12;                        /* ce qui rentre du salaire suisse */
   const restFR=netFR-chargesFR, restCH=netCH-chargesCH;
   const lppEUR=lppTot*fx/12;
 
-  return {fx,mois,brutM,brut,avs,ac,laa,lppTot,lppSal,netCotCHF,netCotEUR,GE,tauxGE,bar,np,couple,conj,enf,
-          meFR,irFR,impotMe,impotConj,impotCH,santeEUR,chargesFR,chargesCH,netFR,netCH,netEUR,restFR,restCH,lppEUR,
+  return {fx,mois,brutM,brut,avs,ac,laa,lppTot,lppSal,netCotCHF,netCotEUR,GE,tauxGE,bar,np,couple,conj,enf,log,resident,source,loyerCH,
+          meFR,irFR,impotMe,impotConj,impotCH,santeEUR,pers,chargesFR,chargesCH,netFR,netCH,netEUR,restFR,restCH,lppEUR,
           delta:restCH-restFR,prix:+$('i-formule').value,start:v('s-start')};
 }
 
@@ -438,14 +457,23 @@ function render(){
   $('o-age').value=v('s-age')+' ans · '+Math.round(lppTaux(v('s-age'))*100)+' %';
   $('o-start').value=m.start+' mois';
   $('i-conj').disabled=!m.couple;
+  $('f-loyerch').hidden=m.log==='same';
+  $('u-loyerch').textContent=m.resident?'CHF / mois':'€ / mois';
+  $('e-loyerch').textContent=m.resident?'loyer suisse, charges comprises':'côté frontière française';
+  $('i-sante').disabled=m.resident;
+  $('i-pers').closest('.f').querySelector('em').textContent=m.resident?'couvertes par la LAMal':'pour la LAMal';
 
   $('p-fr').textContent=fmt(m.netFR);
   $('p-frimp').textContent=fmt(m.irFR/12);
+  $('p-frch').textContent=fmt(m.chargesFR);
   $('p-frrest').textContent=fmt(m.restFR);
   $('p-ch').textContent=fmt(m.netCH);
   $('p-chimp').textContent=fmt(m.impotCH/12);
+  $('p-chch').textContent=fmt(m.chargesCH);
+  $('p-chchlab').textContent=m.log==='same'?'(logement inchangé)':m.resident?'(loyer suisse, vie courante × '+String(P.vieCH).replace('.',',')+')':'(nouveau loyer)';
   $('p-chrest').textContent=fmt(m.restCH);
-  $('p-chimplab').textContent=m.GE?'(source GE, barème '+m.bar+(m.conj>0?', + IR du conjoint)':')'):'(IR français)';
+  $('p-chimplab').textContent=!m.source?'(IR français)'
+    :'('+(m.resident?'source suisse':'source GE')+', barème '+m.bar+(m.conj>0?', + IR du conjoint)':')');
   $('t-frrest').textContent=fmt(m.restFR);
   $('t-chrest').textContent=fmt(m.restCH);
   $('t-delta').textContent=(m.delta>0?'+':'')+fmt(m.delta);
@@ -455,7 +483,8 @@ function render(){
   const revFR=m.meFR+m.conj, revCH=m.netCotEUR+m.conj;
   $('t-impfr').textContent=fmt(m.irFR/12);
   $('t-impch').textContent=fmt(m.impotCH/12);
-  $('t-impchlab').textContent=m.GE?'· source GE'+(m.conj>0?' + IR conjoint':''):'· IR français';
+  $('t-impchlab').textContent=!m.source?'· IR français'
+    :'· '+(m.resident?'source suisse':'source GE')+(m.conj>0?' + IR conjoint':'');
   $('t-taux').textContent=pct(revFR>0?m.irFR/revFR:0)+' → '+pct(revCH>0?m.impotCH/revCH:0);
 
   /* barres */
@@ -480,16 +509,16 @@ function render(){
     +line('Assurance chômage et solidarité',m.ac,1)
     +line('Assurance accident non professionnelle',m.laa,1)
     +line('2e pilier, part salarié ('+Math.round(lppTaux(v('s-age'))*100)+' % du salaire coordonné, moitié employeur)',m.lppSal,1)
-    +line(m.GE?'Impôt à la source, Genève, barème '+m.bar+' — '+pct(m.tauxGE)+' du brut':'Impôt sur le revenu français, part du salaire suisse',m.impotMe/m.fx,1)
+    +line(m.source?'Impôt à la source '+(m.resident?'suisse':'genevoise')+', barème '+m.bar+' — '+pct(m.tauxGE)+' du brut':'Impôt sur le revenu français, part du salaire suisse',m.impotMe/m.fx,1)
     +'<tr class="total"><td>Net qui rentre sur le compte</td><td>'+fmt(m.netEUR/m.fx)+'</td><td>'+fmt(m.netEUR)+'</td></tr>'
-    +line($('i-sante').value==='lamal'?'Assurance maladie LAMal':'Cotisation maladie CMU',m.santeEUR/m.fx,1)
+    +line(m.resident?'Assurance maladie LAMal, résident en Suisse':$('i-sante').value==='lamal'?'Assurance maladie LAMal frontalier':'Cotisation maladie CMU',m.santeEUR/m.fx,1)
     +'<tr class="neg"><td>Trajet vers la Suisse</td><td class="neg">− '+fmt(tr/m.fx)+'</td><td class="neg">− '+fmt(tr)+'</td></tr>'
     +'<tr class="total"><td>Disponible après santé et trajet</td><td>'+fmt((m.netEUR-m.santeEUR/12-tr)/m.fx)+'</td><td>'+fmt(m.netEUR-m.santeEUR/12-tr)+'</td></tr>';
   $('note-decomp').innerHTML='<b>Le 2e pilier est retiré du net mais reste votre argent</b> : '+fmt(m.lppEUR)+' € par mois de capital, part employeur comprise, dont '+fmt(m.lppSal*m.fx/12)+' € prélevés sur votre salaire. '
     +'Cotisations salarié AVS-AI-APG 5,3 %, chômage 1,1 % jusqu’à 148 200 CHF puis 0,5 %, accident non professionnel 0,8 %. 2e pilier au minimum légal : déduction de coordination 26 460 CHF, plafond 64 260 CHF. '
-    +($('i-sante').value==='cmu'?'CMU estimée à 8 % du revenu après abattement. ':'LAMal estimée à 280 CHF par personne et par mois, franchise haute. ')
+    +(m.resident?'LAMal résident estimée à '+P.lamalRes[m.GE?'GE':'VD']+' CHF par personne et par mois (moyenne cantonale 2026, adulte ; un enfant coûte nettement moins). ':$('i-sante').value==='cmu'?'CMU estimée à 8 % du revenu après abattement. ':'LAMal frontalier estimée à 280 CHF par personne et par mois : de 200 CHF chez la caisse la moins chère à plus de 350 CHF ailleurs. ')
     +'Impôt français au barème de l’IR sur '+String(m.np).replace('.',',')+' part'+(m.np>1?'s':'')+', abattement de 10 %, sans plafonnement du quotient ni réductions. '
-    +(m.GE?'À Genève, impôt à la source au barème 2026 '+m.bar+' (taux effectif officiel sur le brut, interpolé entre 50 000 et 200 000 CHF) ; le revenu suisse est exonéré en France mais fixe le taux d’imposition du conjoint. ':'Dans les cantons de l’accord de 1983, le salaire suisse net de cotisations est imposé en France avec le reste du foyer. ')
+    +(m.resident?'Résident en Suisse : impôt à la source suisse, barème '+m.bar+' — le barème genevois sert de référence, à affiner selon le canton et la commune de résidence. Le conjoint qui garde un emploi en France reste imposé en France sur ce seul salaire. ':m.GE?'À Genève, impôt à la source au barème 2026 '+m.bar+' (taux effectif officiel sur le brut, interpolé entre 50 000 et 200 000 CHF) ; le revenu suisse est exonéré en France mais fixe le taux d’imposition du conjoint. ':'Dans les cantons de l’accord de 1983, le salaire suisse net de cotisations est imposé en France avec le reste du foyer. ')
     +'Ordres de grandeur, à valider avec le conseiller fiscal.';
 
   /* accompagnement */
@@ -557,6 +586,13 @@ function render(){
 }
 
 [...NUM,...SEL,...RNG].forEach(id=>{$(id).addEventListener('input',render);$(id).addEventListener('change',render);});
+$('i-log').addEventListener('change',()=>{
+  const l=$('i-log').value;
+  if(l==='fr'){ $('i-loyerch').value=1200; $('i-transch').value=150; }
+  if(l==='ch'){ $('i-loyerch').value=2400; $('i-transch').value=80; }
+  if(l==='same'){ $('i-transch').value=320; }
+  render();
+});
 $('btn-print').addEventListener('click',()=>window.print());
 $('btn-theme').addEventListener('click',()=>{
   const d=document.documentElement;
